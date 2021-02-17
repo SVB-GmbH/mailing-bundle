@@ -4,11 +4,11 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services
         https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="svb_mailer.mailer" class="SVB\Mailing\Mailer" public="true">
+        <service id="svb_mailing.mailer" class="SVB\Mailing\Mailer" public="true">
             <call method="setClient">
-                <argument type="service" id="svb_mailer.mailjet_client"/>
+                <argument type="service" id="svb_mailing.mailjet_client"/>
             </call>
         </service>
-        <service id="SVB\Mailing\Mailer" alias="svb_mailer.mailer" />
+        <service id="SVB\Mailing\Mailer" alias="svb_mailing.mailer" />
     </services>
 </container>
