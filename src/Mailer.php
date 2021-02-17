@@ -7,12 +7,12 @@ use SVB\Mailing\Exception\MailingException;
 use SVB\Mailing\Exception\MailjetException;
 use SVB\Mailing\Mail\MailInterface;
 
-class MailjetMailer
+class Mailer
 {
     /** @var Client */
     private $mailjetClient;
 
-    public function setClient(Client $mailjetClient): MailjetMailer
+    public function setClient(Client $mailjetClient): Mailer
     {
         $this->mailjetClient = $mailjetClient;
 
@@ -28,10 +28,6 @@ class MailjetMailer
         $response = $this->mailjetClient->post(Resources::$Email, ['body' => [
             'Messages' => array_map(function(MailInterface $mail) {
                 return [
-                    'From' => [
-                        'Email' => "info@svb24.com",
-                        'Name' => "SVB "
-                    ],
                     'To' => array_map(
                         function ($email) {
                             return [
@@ -42,7 +38,6 @@ class MailjetMailer
                     ),
                     'TemplateID' => $mail::getTemplateId(),
                     'TemplateLanguage' => true,
-                    'Subject' => "Test ",
                     'Variables' => $mail->getData(),
                 ];
             }, $mails),
