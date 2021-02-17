@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="svb_mailer.mailer" class="SVB\Mailing\MailjetMailer" public="true">
+            <call method="setClient">
+                <argument type="service" id="svb_mailer.mailjet_client"/>
+            </call>
+        </service>
+        <service id="SVB\Mailing\MailjetMailer" alias="svb_mailer.mailer" />
+    </services>
+</container>
