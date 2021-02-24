@@ -18,13 +18,22 @@ class SVBMailingExtension extends ConfigurableExtension
 
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
-        $container->setDefinition('svb_mailing.mailjet_client', new Definition(
+        $container->setDefinition('svb_mailing.mailjet_client.v31', new Definition(
             Client::class,
             [
                 $mergedConfig['mailjet_api_key'] ?? '',
                 $mergedConfig['mailjet_api_secret'] ?? '',
                 true,
                 ['version' => 'v3.1']
+            ]
+        ));
+        $container->setDefinition('svb_mailing.mailjet_client.v30', new Definition(
+            Client::class,
+            [
+                $mergedConfig['mailjet_api_key'] ?? '',
+                $mergedConfig['mailjet_api_secret'] ?? '',
+                true,
+                ['version' => 'v3']
             ]
         ));
 

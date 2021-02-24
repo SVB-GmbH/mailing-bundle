@@ -1,52 +1,48 @@
 <?php
 namespace SVB\Mailing;
 
-use Mailjet\Client;
-use Mailjet\Resources;
+use SVB\Mailing\Connector\ConnectorInterface;
 use SVB\Mailing\Exception\MailingException;
-use SVB\Mailing\Exception\MailjetException;
 use SVB\Mailing\Mail\MailInterface;
 
 class Mailer
 {
-    /** @var Client */
-    private $mailjetClient;
+    private $connectors = [];
 
-    public function setClient(Client $mailjetClient): Mailer
+    public function addConnector(ConnectorInterface $connector)
     {
-        $this->mailjetClient = $mailjetClient;
-
-        return $this;
+        $this->connectors[get_class($connector)] = $connector;
     }
 
     /**
-     * @param MailInterface[] $mails
      * @throws MailingException
      */
-    public function sendMails(array $mails): bool
+    public function sendMail(MailInterface $mail): string
     {
-        $response = $this->mailjetClient->post(Resources::$Email, ['body' => [
-            'Messages' => array_map(function(MailInterface $mail) {
-                return [
-                    'To' => array_map(
-                        function ($email) {
-                            return [
-                                'Email' => $email,
-                            ];
-                        },
-                        $mail->getRecipients()
-                    ),
-                    'TemplateID' => $mail::getTemplateId(),
-                    'TemplateLanguage' => true,
-                    'Variables' => $mail->getData(),
-                ];
-            }, $mails),
-        ]]);
-
-        if (!$response->success()) {
-            throw new MailjetException($response->getReasonPhrase() ?? 'no reason specified by mailjet');
+        if (!$mail->valid()) {
+            throw new MailingException('Mail data validation failed, no error specified!');
         }
 
-        return true;
+        return $this->getConnector($mail::getConnector())->sendMail($mail);
+    }
+
+    /**
+     * @throws MailingException
+     */
+    public function getMailStatus(MailInterface $mail, string $identifier): bool
+    {
+        return $this->getConnector($mail::getConnector())->getMailStatus($identifier);
+    }
+
+    /**
+     * @throws MailingException
+     */
+    private function getConnector(string $connectorClassName): ConnectorInterface
+    {
+        if (!array_key_exists($connectorClassName, $this->connectors)) {
+            throw new MailingException(sprintf('Connector %s not found', $connectorClassName));
+        }
+
+        return $this->connectors[$connectorClassName];
     }
 }

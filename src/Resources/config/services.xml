@@ -4,9 +4,17 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services
         https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
+        <service id="svb_mailing.connectors.mailjet" class="SVB\Mailing\Connector\MailjetConnector" public="true">
+            <call method="setNewClient">
+                <argument type="service" id="svb_mailing.mailjet_client.v31"/>
+            </call>
+            <call method="setOldClient">
+                <argument type="service" id="svb_mailing.mailjet_client.v30"/>
+            </call>
+        </service>
         <service id="svb_mailing.mailer" class="SVB\Mailing\Mailer" public="true">
-            <call method="setClient">
-                <argument type="service" id="svb_mailing.mailjet_client"/>
+            <call method="addConnector">
+                <argument type="service" id="svb_mailing.connectors.mailjet"/>
             </call>
         </service>
         <service id="SVB\Mailing\Mailer" alias="svb_mailing.mailer" />

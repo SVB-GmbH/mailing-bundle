@@ -1,27 +1,34 @@
 <?php
 namespace SVB\Mailing\Mail;
 
+use SVB\Mailing\Exception\MailingException;
+
 abstract class AbstractMail implements MailInterface
 {
-    /** @var string[] */
-    private $recipients;
+    /** @var string */
+    private $recipient;
 
     /** @var array */
     private $data;
 
-    public function __construct(array $recipients, array $data)
+    public function __construct(string $recipient, array $data)
     {
-        $this->recipients = $recipients;
+        $this->recipient = $recipient;
         $this->data = $data;
     }
 
-    public function getRecipients(): array
+    public function getRecipient(): string
     {
-        return $this->recipients;
+        return $this->recipient;
     }
 
     public function getData(): array
     {
         return $this->data;
+    }
+
+    public function valid(): bool
+    {
+        return true;
     }
 }
