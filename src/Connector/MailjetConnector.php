@@ -67,12 +67,18 @@ class MailjetConnector implements ConnectorInterface
         return (string) $messageId;
     }
 
+    /**
+     * todo implement way to catch things like blacklisted and set the mail directly to failed instead of trying multiple times
+     */
     public function getMailStatus(string $identifier): bool
     {
         $response = $this->mailjetOldClient->get(Resources::$Message, ['id' => $identifier]);
-        // TODO implement message check if queued
 
-        return true;
+        if (null === $response->getBody()['Data'][0]['StateID'] ?? null) {
+            return true;
+        }
+
+        return false;
     }
 
     public function setNewClient(Client $mailjetClient): MailjetConnector

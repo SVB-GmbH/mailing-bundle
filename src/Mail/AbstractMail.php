@@ -1,8 +1,6 @@
 <?php
 namespace SVB\Mailing\Mail;
 
-use SVB\Mailing\Exception\MailingException;
-
 abstract class AbstractMail implements MailInterface
 {
     /** @var string */

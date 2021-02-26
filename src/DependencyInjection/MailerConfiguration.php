@@ -13,8 +13,16 @@ class MailerConfiguration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
-                ->scalarNode('mailjet_api_key')->end()
-                ->scalarNode('mailjet_api_secret')->end()
+                ->scalarNode('database_dsn')->end()
+                ->arrayNode('connectors')
+                ->children()
+                    ->arrayNode('mailjet')
+                        ->children()
+                            ->scalarNode('mailjet_api_key')->end()
+                            ->scalarNode('mailjet_api_secret')->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end()
         ;
 

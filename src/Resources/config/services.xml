@@ -4,7 +4,16 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services
         https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="svb_mailing.connectors.mailjet" class="SVB\Mailing\Connector\MailjetConnector" public="true">
+        <service id="svb_mailing.commands.mail_worker" class="\SVB\Mailing\Command\MailWorkerCommand" public="false">
+            <call method="setMailer">
+                <argument type="service" id="svb_mailing.mailer"/>
+            </call>
+            <call method="setMailRepository">
+                <argument type="service" id="svb_mailing.mail_repository"/>
+            </call>
+            <tag name="console.command" />
+        </service>
+        <service id="svb_mailing.connectors.mailjet" class="SVB\Mailing\Connector\MailjetConnector" public="false">
             <call method="setNewClient">
                 <argument type="service" id="svb_mailing.mailjet_client.v31"/>
             </call>
@@ -12,11 +21,22 @@
                 <argument type="service" id="svb_mailing.mailjet_client.v30"/>
             </call>
         </service>
+        <service id="svb_mailing.mail_repository" class="SVB\Mailing\MailRepository" public="false">
+            <call method="setConnection">
+                <argument type="service" id="svb_mailing.database_connection"/>
+            </call>
+        </service>
         <service id="svb_mailing.mailer" class="SVB\Mailing\Mailer" public="true">
             <call method="addConnector">
                 <argument type="service" id="svb_mailing.connectors.mailjet"/>
             </call>
+            <call method="setMailRepository">
+                <argument type="service" id="svb_mailing.mail_repository"/>
+            </call>
         </service>
         <service id="SVB\Mailing\Mailer" alias="svb_mailing.mailer" />
+
+        <!-- Mails -->
+        <service id="svb_mailing.mails.order.order_confirmation_mail" class="SVB\Mailing\Mail\Order\OrderConfirmationMail"><tag name="svb_mailing.mail" /></service>
     </services>
 </container>

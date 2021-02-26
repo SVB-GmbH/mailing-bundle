@@ -17,3 +17,8 @@ This bundle has been developed in order to send mails from multiple systems with
 1. Create one or more mail objects using one of the many mail templates located within the namespace `SVB\Mailing\Mail\`
 1. Pass your object(s) into the sendMails method of the `svb_mailing.mailer` service
 1. You mail should either been sent, or you should have got an exception what to do
+
+## Adding new Mail Templates
+1. Create a new class implementing MailInterface (AbstractMail to make your life a bit easier) within src/mails  
+_Hint: Mail Templates do not necessarily need to be in one folder, use sub directories to order them!_
+1. Register the Template as as service and use the `svb_mailing.mail` tag

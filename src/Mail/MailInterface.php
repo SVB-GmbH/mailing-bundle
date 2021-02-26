@@ -5,6 +5,10 @@ use SVB\Mailing\Exception\MailingException;
 
 interface MailInterface
 {
+    public function __construct(string $recipient, array $data);
+
+    public static function getIdentifier(): string;
+
     public static function getTemplateId(): int;
 
     public static function getConnector(): string;

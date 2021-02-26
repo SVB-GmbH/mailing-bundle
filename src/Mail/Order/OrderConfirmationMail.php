@@ -7,9 +7,14 @@ use SVB\Mailing\Mail\AbstractMail;
 
 class OrderConfirmationMail extends AbstractMail
 {
+    public static function getIdentifier(): string
+    {
+        return 'order_confirmation';
+    }
+
     public static function getTemplateId(string $languageIso2 = 'en'): int
     {
-        return 2431962;
+        return 2499087;#2431962;
     }
 
     /**
@@ -17,7 +22,7 @@ class OrderConfirmationMail extends AbstractMail
      */
     public function valid(): bool
     {
-        if (!array_key_exists('orders', $this->getData()) || !is_array($this->getData()['orders']) || empty($this->getData()['orders'])) {
+        if (!array_key_exists('order', $this->getData()) || !is_array($this->getData()['order']) || empty($this->getData()['order'])) {
             throw new MailingException('The "order" data has to be an array containing order items.');
         }
 
