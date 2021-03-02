@@ -2,10 +2,11 @@
 
 namespace SVB\Mailing\Command;
 
+use Doctrine\DBAL\Driver\Exception;
 use SVB\Mailing\Exception\MailingException;
 use SVB\Mailing\Mail\MailInterface;
 use SVB\Mailing\Mailer;
-use SVB\Mailing\MailRepository;
+use SVB\Mailing\Repository\MailRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,6 +39,7 @@ class MailWorkerCommand extends Command
 
     /**
      * @throws MailingException
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -62,13 +64,15 @@ class MailWorkerCommand extends Command
                         $this->mailRepository->markMailAsSucceeded($mailRow['id']);
                         continue;
                     }
-                } catch (MailingException $exception) {
+                } catch (MailingException|Exception $exception) {
+                    // TODO do something
+                    $a = true;
                 }
             }
 
             try {
                 $this->mailer->resendMail($mailRow['id'], $mail);
-            } catch (MailingException $exception) {
+            } catch (MailingException|Exception $exception) {
                 // TODO do something
                 $a = true;
             }
