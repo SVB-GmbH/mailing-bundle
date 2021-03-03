@@ -10,7 +10,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class SVBMailingExtension extends ConfigurableExtension
@@ -22,9 +21,12 @@ class SVBMailingExtension extends ConfigurableExtension
 
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
+        $container->setParameter('svb.mailing.tries_count', $mergedConfig['tries_count']);
+        $container->setParameter('svb.mailing.database.table_main', $mergedConfig['database']['table_main']);
+        $container->setParameter('svb.mailing.database.table_data', $mergedConfig['database']['table_data']);
         $container->setDefinition(
             'svb_mailing.database_connection',
-            (new Definition(Connection::class, [['url' => $mergedConfig['database_dsn']]]))
+            (new Definition(Connection::class, [['url' => $mergedConfig['database']['url']]]))
                 ->setFactory([DriverManager::class, 'getConnection'])
         );
         $container->setDefinition('svb_mailing.mailjet_client.v31', new Definition(
