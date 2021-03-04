@@ -21,9 +21,13 @@
                 <argument type="service" id="svb_mailing.mailjet_client.v30"/>
             </call>
         </service>
-        <service id="svb_mailing.mail_repository" class="SVB\Mailing\MailRepository" public="false">
+        <service id="svb_mailing.mail_repository" class="SVB\Mailing\Repository\MailRepository" public="false">
             <call method="setConnection">
-                <argument type="service" id="svb_mailing.database_connection"/>
+                <argument type="service" id="svb_mailing.database_connection" />
+            </call>
+            <call method="setTables">
+                <argument>%svb.mailing.database.table_main%</argument>
+                <argument>%svb.mailing.database.table_data%</argument>
             </call>
         </service>
         <service id="svb_mailing.mailer" class="SVB\Mailing\Mailer" public="true">
@@ -35,8 +39,5 @@
             </call>
         </service>
         <service id="SVB\Mailing\Mailer" alias="svb_mailing.mailer" />
-
-        <!-- Mails -->
-        <service id="svb_mailing.mails.order.order_confirmation_mail" class="SVB\Mailing\Mail\Order\OrderConfirmationMail"><tag name="svb_mailing.mail" /></service>
     </services>
 </container>

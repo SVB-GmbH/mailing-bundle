@@ -4,6 +4,7 @@ namespace SVB\Mailing;
 use SVB\Mailing\Connector\ConnectorInterface;
 use SVB\Mailing\Exception\MailingException;
 use SVB\Mailing\Mail\MailInterface;
+use SVB\Mailing\Repository\MailRepository;
 
 class Mailer
 {
