@@ -21,6 +21,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
-      - name: Run tests
-        run: make tests
+        run: composer install --dev --no-interaction --no-progress --no-suggest
+      - name: Run unit tests
+        run: php vendor/bin/phpunit --testsuite unit
+
