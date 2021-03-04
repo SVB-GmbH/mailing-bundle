@@ -2,6 +2,7 @@
     "name": "svb/mailing",
     "description": "Enable third party mailing via connectors that provide api access for sending templated e-mails",
     "type": "symfony-bundle",
+    "license": "MIT",
     "authors": [
         {
             "name": "Patrick Siemen",
