@@ -14,11 +14,21 @@
         "symfony/http-kernel": "^3.4|^4.3",
         "symfony/config": "^3.4|^4.3",
         "doctrine/dbal": "^2.0|^3.0",
-        "symfony/console": "^4.0|^5.0"
+        "symfony/console": "^4.0|^5.0",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
             "SVB\\Mailing\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SVB\\Mailing\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "mockery/mockery": "^1.4"
     }
 }

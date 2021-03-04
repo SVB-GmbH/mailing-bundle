@@ -1,7 +1,7 @@
 <?php
 namespace SVB\Mailing\Mail;
 
-use SVB\Mailing\Exception\MailingException;
+use SVB\Mailing\Exception\MailDataInvalidException;
 
 interface MailInterface
 {
@@ -13,7 +13,7 @@ interface MailInterface
 
     public static function getConnector(): string;
 
-    /** @throws MailingException */
+    /** @throws MailDataInvalidException */
     public function valid(): bool;
 
     public function getRecipient(): string;

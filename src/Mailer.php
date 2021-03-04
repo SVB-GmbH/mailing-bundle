@@ -1,7 +1,10 @@
 <?php
 namespace SVB\Mailing;
 
+use Doctrine\DBAL\Driver\Exception;
 use SVB\Mailing\Connector\ConnectorInterface;
+use SVB\Mailing\Exception\ConnectorNotFoundException;
+use SVB\Mailing\Exception\MailDataInvalidException;
 use SVB\Mailing\Exception\MailingException;
 use SVB\Mailing\Mail\MailInterface;
 use SVB\Mailing\Repository\MailRepository;
@@ -27,12 +30,14 @@ class Mailer
     /**
      * @param MailInterface $mail the mail dto that should be send
      * @param bool $spool if set to true, the message is spooled and will be send asynchronous, which is faster
-     * @throws MailingException
+     * @throws ConnectorNotFoundException
+     * @throws MailDataInvalidException
+     * @throws Exception
      */
     public function sendMail(MailInterface $mail, bool $spool = false): void
     {
         if (!$mail->valid()) {
-            throw new MailingException('Mail data validation failed, no error specified!');
+            throw new MailDataInvalidException('Mail data validation failed, no error specified!');
         }
 
         $connector = $this->getConnector($mail::getConnector());
@@ -42,8 +47,8 @@ class Mailer
                 $messageIdentifier = $connector->sendMail($mail);
                 if (!empty($messageIdentifier)) {
                     $this->mailRepository->logMail($mail, $messageIdentifier);
-                    return;
                 }
+                return;
             } catch (MailingException $exception) {
                 // TODO log exception somewhere
                 $a = true;
@@ -57,6 +62,7 @@ class Mailer
      * @param int $mailId database mail id
      * @param MailInterface $mail the mail dto that should be send
      * @throws MailingException
+     * @throws Exception
      */
     public function resendMail(int $mailId, MailInterface $mail): void
     {
@@ -74,7 +80,7 @@ class Mailer
     }
 
     /**
-     * @throws MailingException
+     * @throws ConnectorNotFoundException
      */
     public function getMailStatus(MailInterface $mail, string $identifier): bool
     {
@@ -82,12 +88,12 @@ class Mailer
     }
 
     /**
-     * @throws MailingException
+     * @throws ConnectorNotFoundException
      */
     private function getConnector(string $connectorClassName): ConnectorInterface
     {
         if (!array_key_exists($connectorClassName, $this->connectors)) {
-            throw new MailingException(sprintf('Connector %s not found', $connectorClassName));
+            throw new ConnectorNotFoundException(sprintf('Connector %s not found', $connectorClassName));
         }
 
         return $this->connectors[$connectorClassName];
