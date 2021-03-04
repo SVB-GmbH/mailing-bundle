@@ -1,6 +1,6 @@
 {
     "name": "svb/mailing",
-    "description": "Enable third party mailing via the mailjet transactional mailing service",
+    "description": "Enable third party mailing via connectors that provide api access for sending templated e-mails",
     "type": "symfony-bundle",
     "authors": [
         {
