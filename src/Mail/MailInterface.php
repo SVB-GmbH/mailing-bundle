@@ -9,7 +9,7 @@ interface MailInterface
 
     public static function getIdentifier(): string;
 
-    public static function getTemplateId(): int;
+    public static function getTemplateId(string $languageIso2): string;
 
     public static function getConnector(): string;
 
