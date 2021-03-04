@@ -7,8 +7,20 @@ on:
   workflow_dispatch:
 jobs:
   test:
-    runs-on: php:cli-alpine
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Execute tests
-        run: make test
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+      - name: Run tests
+        run: make tests
