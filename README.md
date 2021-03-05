@@ -23,7 +23,10 @@ This bundle has been developed in order to send mails from multiple systems with
 ## Adding Mail Templates
 1. Create a new class implementing MailInterface (AbstractMail to make your life a bit easier)  
 _Hint: Mail Templates do not necessarily need to be in one folder, use sub directories to order them!_
-1. Register the Template as a service and use the `svb_mailing.mail` tag (probably both already done through the sf auto wiring)
+1. Add the template to the parameter "svb_mailing.mail_identifiers" (identifier string => fully qualified classname)
+
+_**Pro tip:** Definitely consider creating a reusable bundle for your templates, that way you can use your templates
+across all projects!_  
 
 ## Asynchronous resending of failed messages
 Since most provider handle sent messages using message queues, most responses for a "send" request will return "200 OK".
