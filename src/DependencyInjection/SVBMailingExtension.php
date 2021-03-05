@@ -14,6 +14,8 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class SVBMailingExtension extends ConfigurableExtension
 {
+    public const MAIL_IDENTIFIERS_PARAMETER_NAME = 'svb_mailing.mail_identifiers';
+
     public function getConfiguration(array $config, ContainerBuilder $container)
     {
         return new MailerConfiguration();
@@ -21,9 +23,10 @@ class SVBMailingExtension extends ConfigurableExtension
 
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
-        $container->setParameter('svb.mailing.tries_count', $mergedConfig['tries_count']);
-        $container->setParameter('svb.mailing.database.table_main', $mergedConfig['database']['table_main']);
-        $container->setParameter('svb.mailing.database.table_data', $mergedConfig['database']['table_data']);
+        $container->setParameter(self::MAIL_IDENTIFIERS_PARAMETER_NAME, []);
+        $container->setParameter('svb_mailing.tries_count', $mergedConfig['tries_count']);
+        $container->setParameter('svb_mailing.database.table_main', $mergedConfig['database']['table_main']);
+        $container->setParameter('svb_mailing.database.table_data', $mergedConfig['database']['table_data']);
         $container->setDefinition(
             'svb_mailing.database_connection',
             (new Definition(Connection::class, [['url' => $mergedConfig['database']['url']]]))
@@ -52,16 +55,5 @@ class SVBMailingExtension extends ConfigurableExtension
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
-
-        $taggedServices = $container->findTaggedServiceIds('svb_mailing.mail');
-
-        $map = [];
-        foreach ($taggedServices as $id => $tags) {
-            $classname = $container->getDefinition($id)->getClass();
-            if (class_exists($classname) && is_subclass_of($classname, MailInterface::class)) {
-                $map[$classname::getIdentifier()] = $classname;
-            }
-        }
-        $container->getDefinition('svb_mailing.mail_repository')->addMethodCall('setMailIdentifierMap', [$map]);
     }
 }

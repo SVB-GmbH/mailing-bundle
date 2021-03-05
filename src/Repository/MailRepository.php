@@ -25,9 +25,11 @@ class MailRepository
     /** @var array */
     private $mailIdentifierMap = [];
 
-    private string $mainTableName = self::DEFAULT_TABLE_NAME_MAIN;
+    /** @var string */
+    private $mainTableName = self::DEFAULT_TABLE_NAME_MAIN;
 
-    private string $dataTableName = self::DEFAULT_TABLE_NAME_DATA;
+    /** @var string */
+    private $dataTableName = self::DEFAULT_TABLE_NAME_DATA;
 
     public function setConnection(Connection $connection)
     {
@@ -51,14 +53,15 @@ class MailRepository
     public function logMail(MailInterface $mail, string $identifier = '')
     {
         $this->connection->exec(sprintf(
-            'INSERT INTO %s (mail_alias, receiver, last_sent, tries, api_identifier, status) VALUES (\'%s\', \'%s\', %s, %d, \'%s\', \'%s\')',
+            'INSERT INTO %s (mail_alias, receiver, last_sent, tries, api_identifier, status, locale) VALUES (\'%s\', \'%s\', %s, %d, \'%s\', \'%s\', \'%s\')',
             $this->mainTableName,
             $mail::getIdentifier(),
             $mail->getRecipient(),
             !empty($identifier) ? 'NOW()' : 'NULL',
             !empty($identifier) ? 1 : 0,
             $identifier,
-            !empty($identifier) ? self::STATUS_WAIT : self::STATUS_CREATED
+            !empty($identifier) ? self::STATUS_WAIT : self::STATUS_CREATED,
+            $mail->getLocale()
         ));
         $this->connection->exec(sprintf(
             'INSERT INTO %s (mail_id, data) VALUES (\'%d\', \'%s\')',
@@ -71,7 +74,7 @@ class MailRepository
     public function getUnhandledMails(int $limit): array
     {
         $statement = $this->connection->prepare(sprintf(
-            'SELECT m.*, md.* FROM %s m LEFT JOIN %s md ON md.mail_id = m.id WHERE m.status NOT IN (%s) LIMIT %d',
+            'SELECT m.*, md.data FROM %s m LEFT JOIN %s md ON md.mail_id = m.id WHERE m.status NOT IN (%s) LIMIT %d',
             $this->mainTableName,
             $this->dataTableName,
             implode(',', array_map(function($value) { return '\'' . $value . '\''; }, self::FINAL_STATUS)),
@@ -114,7 +117,7 @@ class MailRepository
     public function cleanupOldData(): void
     {
         $this->connection->exec(sprintf(
-            'DELETE %s md LEFT JOIN %s m ON m.id = md.mail_id WHERE m.last_sent < \'%s\' AND m.status IN (%s) AND m.last_sent < \'%s\'',
+            'DELETE md FROM %s md JOIN %s m ON m.id = md.mail_id WHERE m.last_sent < \'%s\' AND m.status IN (%s) AND m.last_sent < \'%s\'',
             $this->dataTableName,
             $this->mainTableName,
             (new DateTime('1 year ago'))->format('Y-m-d H:i:s'),
@@ -129,7 +132,7 @@ class MailRepository
             return null;
         }
 
-        if (empty($mailRow['data'])) {
+        if (empty($mailRow['data']) || empty($mailRow['locale'])) {
             return null;
         }
 
@@ -138,7 +141,7 @@ class MailRepository
             return null;
         }
 
-        return new $class($mailRow['receiver'], json_decode(utf8_encode($mailRow['data']) ?? [], true));
+        return new $class($mailRow['receiver'], json_decode(utf8_encode($mailRow['data']), true) ?? [], $mailRow['locale']);
     }
 
     /**

@@ -4,15 +4,19 @@ namespace SVB\Mailing\Mail;
 abstract class AbstractMail implements MailInterface
 {
     /** @var string */
-    private $recipient;
+    protected $recipient;
 
     /** @var array */
-    private $data;
+    protected $data;
 
-    public function __construct(string $recipient, array $data)
+    /** @var string */
+    protected $locale;
+
+    public function __construct(string $recipient, array $data, string $locale)
     {
         $this->recipient = $recipient;
         $this->data = $data;
+        $this->locale = $locale;
     }
 
     public function getRecipient(): string
@@ -28,5 +32,10 @@ abstract class AbstractMail implements MailInterface
     public function valid(): bool
     {
         return true;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
     }
 }

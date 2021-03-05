@@ -3,6 +3,7 @@
 namespace SVB\Mailing\Command;
 
 use Doctrine\DBAL\Driver\Exception;
+use SVB\Mailing\Connector\ConnectorInterface;
 use SVB\Mailing\Exception\MailingException;
 use SVB\Mailing\Mail\MailInterface;
 use SVB\Mailing\Mailer;
@@ -54,20 +55,20 @@ class MailWorkerCommand extends Command
             if (!$mail instanceof MailInterface) {
                 $this->mailRepository->markMailAsFailed($mailRow['id']);
                 // todo log exception?
-                #throw new MailingException('mail data could not be deserialized from database into MailInterface object.');
+                # mail data could not be deserialized from database into MailInterface object.
                 continue;
             }
 
             if (!empty($mailRow['api_identifier'])) {
-                try {
-                    if ($this->mailer->getMailStatus($mail, $mailRow['api_identifier'])) {
+                switch ($this->mailer->getMailStatus($mail, $mailRow['api_identifier'])) {
+                    case ConnectorInterface::MAIL_STATUS_SUCCESS:
                         $this->mailRepository->markMailAsSucceeded($mailRow['id']);
-                        continue;
-                    }
-                } catch (MailingException|Exception $exception) {
-                    // TODO do something
-                    $a = true;
+                        break;
+                    case ConnectorInterface::MAIL_STATUS_FAILED:
+                        $this->mailRepository->markMailAsFailed($mailRow['id']);
+                        break;
                 }
+                continue;
             }
 
             try {
@@ -79,6 +80,8 @@ class MailWorkerCommand extends Command
 
             $this->mailRepository->increaseMailTries($mailRow['id'], $mailRow['tries']);
         }
+
+        $this->mailRepository->cleanupOldData();
 
         return 0;
     }

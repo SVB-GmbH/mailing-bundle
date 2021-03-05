@@ -17,13 +17,15 @@ class Mailer
     /** @var MailRepository */
     private $mailRepository;
 
-    public function addConnector(ConnectorInterface $connector)
+    /**
+     * @param ConnectorInterface[]|iterable $connectors
+     */
+    public function __construct(iterable $connectors, MailRepository $mailRepository)
     {
-        $this->connectors[get_class($connector)] = $connector;
-    }
+        foreach ($connectors as $connector) {
+            $this->connectors[get_class($connector)] = $connector;
+        }
 
-    public function setMailRepository(MailRepository $mailRepository)
-    {
         $this->mailRepository = $mailRepository;
     }
 
@@ -82,7 +84,7 @@ class Mailer
     /**
      * @throws ConnectorNotFoundException
      */
-    public function getMailStatus(MailInterface $mail, string $identifier): bool
+    public function getMailStatus(MailInterface $mail, string $identifier): string
     {
         return $this->getConnector($mail::getConnector())->getMailStatus($identifier);
     }

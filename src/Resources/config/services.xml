@@ -20,23 +20,23 @@
             <call method="setOldClient">
                 <argument type="service" id="svb_mailing.mailjet_client.v30"/>
             </call>
+            <tag name="svb_mailing.connector" />
         </service>
         <service id="svb_mailing.mail_repository" class="SVB\Mailing\Repository\MailRepository" public="false">
             <call method="setConnection">
                 <argument type="service" id="svb_mailing.database_connection" />
             </call>
             <call method="setTables">
-                <argument>%svb.mailing.database.table_main%</argument>
-                <argument>%svb.mailing.database.table_data%</argument>
+                <argument>%svb_mailing.database.table_main%</argument>
+                <argument>%svb_mailing.database.table_data%</argument>
+            </call>
+            <call method="setMailIdentifierMap">
+                <argument>%svb_mailing.mail_identifiers%</argument>
             </call>
         </service>
         <service id="svb_mailing.mailer" class="SVB\Mailing\Mailer" public="true">
-            <call method="addConnector">
-                <argument type="service" id="svb_mailing.connectors.mailjet"/>
-            </call>
-            <call method="setMailRepository">
-                <argument type="service" id="svb_mailing.mail_repository"/>
-            </call>
+            <argument type="tagged_iterator" tag="svb_mailing.connector"/>
+            <argument type="service" id="svb_mailing.mail_repository"/>
         </service>
         <service id="SVB\Mailing\Mailer" alias="svb_mailing.mailer" />
     </services>

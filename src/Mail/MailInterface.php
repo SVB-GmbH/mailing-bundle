@@ -5,11 +5,11 @@ use SVB\Mailing\Exception\MailDataInvalidException;
 
 interface MailInterface
 {
-    public function __construct(string $recipient, array $data);
+    public function __construct(string $recipient, array $data, string $locale);
 
     public static function getIdentifier(): string;
 
-    public static function getTemplateId(string $languageIso2): string;
+    public function getTemplateId(): string;
 
     public static function getConnector(): string;
 
@@ -19,4 +19,6 @@ interface MailInterface
     public function getRecipient(): string;
 
     public function getData(): array;
+
+    public function getLocale(): string;
 }

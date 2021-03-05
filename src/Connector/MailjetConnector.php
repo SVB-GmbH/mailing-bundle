@@ -38,7 +38,7 @@ class MailjetConnector implements ConnectorInterface
                                 'Email' => $mail->getRecipient()
                             ],
                         ],
-                        'TemplateID' => $mail::getTemplateId(),
+                        'TemplateID' => intval($mail->getTemplateId()),
                         'TemplateLanguage' => true,
                         'Variables' => $mail->getData(),
                         'AdvanceErrorHandling' => true,
@@ -67,18 +67,23 @@ class MailjetConnector implements ConnectorInterface
         return (string) $messageId;
     }
 
-    /**
-     * todo implement way to catch things like blacklisted and set the mail directly to failed instead of trying multiple times
-     */
-    public function getMailStatus(string $identifier): bool
+    public function getMailStatus(string $identifier): string
     {
-        $response = $this->mailjetOldClient->get(Resources::$Message, ['id' => $identifier]);
-
-        if (null === $response->getBody()['Data'][0]['StateID'] ?? null) {
-            return true;
+        try {
+            $response = $this->mailjetOldClient->get(Resources::$Message, ['id' => $identifier]);
+        } catch (GuzzleException $exception) {
+            return ConnectorInterface::MAIL_STATUS_TRY_LATER;
         }
 
-        return false;
+        if (!$response->success()) {
+            return ConnectorInterface::MAIL_STATUS_TRY_LATER;
+        }
+
+        if (array_key_exists('StateID', $response->getBody()['Data'][0])) {
+            return ConnectorInterface::MAIL_STATUS_FAILED;
+        }
+
+        return ConnectorInterface::MAIL_STATUS_SUCCESS;
     }
 
     public function setNewClient(Client $mailjetClient): MailjetConnector
