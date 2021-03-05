@@ -47,6 +47,11 @@ class MailRepository
         $this->mailIdentifierMap = $map;
     }
 
+    public function getMailIdentifierMap(): array
+    {
+        return $this->mailIdentifierMap;
+    }
+
     /**
      * @throws Exception
      */
@@ -128,20 +133,30 @@ class MailRepository
 
     public function getMailFromDatabaseResult(array $mailRow): ?MailInterface
     {
-        if (!array_key_exists($mailRow['mail_alias'], $this->mailIdentifierMap)) {
+        return $this->constructMailObject($mailRow['mail_alias'], $mailRow['data'], $mailRow['receiver'], $mailRow['locale']);
+    }
+
+    public function constructMailObject(string $mailIdentifier, string $jsonData, string $receiver, string $locale = 'en'): ?MailInterface
+    {
+        if (!array_key_exists($mailIdentifier, $this->mailIdentifierMap)) {
             return null;
         }
 
-        if (empty($mailRow['data']) || empty($mailRow['locale'])) {
+        if (empty($jsonData) || empty($locale)) {
             return null;
         }
 
-        $class = $this->mailIdentifierMap[$mailRow['mail_alias']];
+        $data = json_decode(utf8_encode($jsonData), true);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        $class = $this->mailIdentifierMap[$mailIdentifier];
         if (!is_subclass_of($class, MailInterface::class)) {
             return null;
         }
 
-        return new $class($mailRow['receiver'], json_decode(utf8_encode($mailRow['data']), true) ?? [], $mailRow['locale']);
+        return new $class($receiver, $data, $locale);
     }
 
     /**

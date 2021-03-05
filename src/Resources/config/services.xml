@@ -4,7 +4,16 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services
         https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="svb_mailing.commands.mail_worker" class="\SVB\Mailing\Command\MailWorkerCommand" public="false">
+        <service id="svb_mailing.commands.mail_worker" class="SVB\Mailing\Command\MailWorkerCommand" public="false">
+            <call method="setMailer">
+                <argument type="service" id="svb_mailing.mailer"/>
+            </call>
+            <call method="setMailRepository">
+                <argument type="service" id="svb_mailing.mail_repository"/>
+            </call>
+            <tag name="console.command" />
+        </service>
+        <service id="svb_mailing.commands.mail_sender" class="SVB\Mailing\Command\MailingSendManuallyCommand" public="false">
             <call method="setMailer">
                 <argument type="service" id="svb_mailing.mailer"/>
             </call>
