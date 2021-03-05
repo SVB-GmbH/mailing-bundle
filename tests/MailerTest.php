@@ -18,7 +18,7 @@ class MailerTest extends MockeryTestCase
 {
     public function testInitialization()
     {
-        $mailer = new Mailer();
+        $mailer = new Mailer([], M::mock(MailRepository::class));
 
         $this->assertInstanceOf(Mailer::class, $mailer);
     }
@@ -29,7 +29,7 @@ class MailerTest extends MockeryTestCase
 
         $mailMock->shouldReceive('valid')->withNoArgs()->once()->andReturnFalse();
 
-        $mailer = new Mailer();
+        $mailer = new Mailer([], M::mock(MailRepository::class));
 
         $this->expectException(MailDataInvalidException::class);
         $this->expectExceptionMessage('Mail data validation failed, no error specified!');
@@ -44,7 +44,7 @@ class MailerTest extends MockeryTestCase
         $mailMock->shouldReceive('valid')->withNoArgs()->once()->andReturnTrue();
         $mailMock->shouldReceive('getConnector')->withNoArgs()->once()->andReturn(ConnectorInterface::class);
 
-        $mailer = new Mailer();
+        $mailer = new Mailer([], M::mock(MailRepository::class));
 
         $this->expectException(ConnectorNotFoundException::class);
         $this->expectExceptionMessage('Connector SVB\Mailing\Connector\ConnectorInterface not found');
@@ -62,9 +62,7 @@ class MailerTest extends MockeryTestCase
         $mailMock->shouldReceive('getConnector')->withNoArgs()->once()->andReturn(get_class($connectorMock));
         $mailRepositoryMock->shouldReceive('logMail')->with($mailMock)->once()->andReturnNull();
 
-        $mailer = new Mailer();
-        $mailer->addConnector($connectorMock);
-        $mailer->setMailRepository($mailRepositoryMock);
+        $mailer = new Mailer([$connectorMock], $mailRepositoryMock);
 
         $mailer->sendMail($mailMock, true);
     }
@@ -81,9 +79,7 @@ class MailerTest extends MockeryTestCase
         $mailRepositoryMock->shouldReceive('logMail')->with($mailMock)->once()->andReturnNull();
 
 
-        $mailer = new Mailer();
-        $mailer->addConnector($connectorMock);
-        $mailer->setMailRepository($mailRepositoryMock);
+        $mailer = new Mailer([$connectorMock], $mailRepositoryMock);
 
         $mailer->sendMail($mailMock);
     }
@@ -98,10 +94,7 @@ class MailerTest extends MockeryTestCase
         $mailMock->shouldReceive('getConnector')->withNoArgs()->once()->andReturn(get_class($connectorMock));
         $connectorMock->shouldReceive('sendMail')->with($mailMock)->once()->andReturn('');
 
-
-        $mailer = new Mailer();
-        $mailer->addConnector($connectorMock);
-        $mailer->setMailRepository($mailRepositoryMock);
+        $mailer = new Mailer([$connectorMock], $mailRepositoryMock);
 
         $mailer->sendMail($mailMock);
     }
@@ -119,9 +112,7 @@ class MailerTest extends MockeryTestCase
         $connectorMock->shouldReceive('sendMail')->with($mailMock)->once()->andReturn($testMessageIdentifier);
         $mailRepositoryMock->shouldReceive('logMail')->with($mailMock, $testMessageIdentifier)->once()->andReturnNull();
 
-        $mailer = new Mailer();
-        $mailer->addConnector($connectorMock);
-        $mailer->setMailRepository($mailRepositoryMock);
+        $mailer = new Mailer([$connectorMock], $mailRepositoryMock);
 
         $mailer->sendMail($mailMock);
     }
