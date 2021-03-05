@@ -51,8 +51,6 @@ class SVBMailingExtension extends ConfigurableExtension
             ]
         ));
 
-        $container->registerForAutoconfiguration(MailInterface::class)->addTag('svb_mailing.mail');
-
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
     }
