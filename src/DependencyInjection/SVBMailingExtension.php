@@ -5,7 +5,6 @@ namespace SVB\Mailing\DependencyInjection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Mailjet\Client;
-use SVB\Mailing\Mail\MailInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
