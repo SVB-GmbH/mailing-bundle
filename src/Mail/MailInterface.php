@@ -7,7 +7,7 @@ interface MailInterface
 {
     public function __construct(string $recipient, array $data, string $locale);
 
-    public static function getIdentifier(): string;
+    public static function getTemplateAlias(): string;
 
     public function getTemplateId(): string;
 
@@ -21,4 +21,6 @@ interface MailInterface
     public function getData(): array;
 
     public function getLocale(): string;
+
+    public function getIdentifier(): string;
 }

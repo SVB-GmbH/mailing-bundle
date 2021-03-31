@@ -44,18 +44,26 @@ class MailWorkerCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $status = 0;
         foreach ($this->mailRepository->getUnhandledMails(50) as $mailRow) {
             if ($mailRow['tries'] > 5) {
                 $this->mailRepository->markMailAsFailed($mailRow['id']);
-                // TODO log something?
+                $output->writeln(sprintf(
+                    'Mail #%s has been marked as failed because it took too many tries to send it to the user.',
+                    $mailRow['id']
+                ));
+                $status = 1;
                 continue;
             }
 
             $mail = $this->mailRepository->getMailFromDatabaseResult($mailRow);
             if (!$mail instanceof MailInterface) {
                 $this->mailRepository->markMailAsFailed($mailRow['id']);
-                // todo log exception?
-                # mail data could not be deserialized from database into MailInterface object.
+                $output->writeln(sprintf(
+                    'Mail #%s has been marked as failed because the mailer was not able to deserialize a new MailInterface using the serialized data from the database.',
+                    $mailRow['id']
+                ));
+                $status = 1;
                 continue;
             }
 
@@ -63,9 +71,18 @@ class MailWorkerCommand extends Command
                 switch ($this->mailer->getMailStatus($mail, $mailRow['api_identifier'])) {
                     case ConnectorInterface::MAIL_STATUS_SUCCESS:
                         $this->mailRepository->markMailAsSucceeded($mailRow['id']);
+                        $output->writeln(sprintf(
+                            'Mail #%s has been marked as success.',
+                            $mailRow['id']
+                        ));
                         break;
                     case ConnectorInterface::MAIL_STATUS_FAILED:
                         $this->mailRepository->markMailAsFailed($mailRow['id']);
+                        $output->writeln(sprintf(
+                            'Mail #%s has been marked as failed because the Connector API responded with a failed mail status.',
+                            $mailRow['id']
+                        ));
+                        $status = 1;
                         break;
                 }
                 continue;
@@ -74,8 +91,12 @@ class MailWorkerCommand extends Command
             try {
                 $this->mailer->resendMail($mailRow['id'], $mail);
             } catch (MailingException|Exception $exception) {
-                // TODO do something
-                $a = true;
+                $output->writeln(sprintf(
+                    'Mail #%s could not be (re-)send due to error: %s',
+                    $mailRow['id'],
+                    $exception->getMessage()
+                ));
+                $status = 1;
             }
 
             $this->mailRepository->increaseMailTries($mailRow['id'], $mailRow['tries']);
@@ -83,6 +104,6 @@ class MailWorkerCommand extends Command
 
         $this->mailRepository->cleanupOldData();
 
-        return 0;
+        return $status;
     }
 }

@@ -55,18 +55,19 @@ class MailRepository
     /**
      * @throws Exception
      */
-    public function logMail(MailInterface $mail, string $identifier = '')
+    public function logMail(MailInterface $mail, string $apiIdentifier = '')
     {
         $this->connection->exec(sprintf(
-            'INSERT INTO %s (mail_alias, receiver, last_sent, tries, api_identifier, status, locale) VALUES (\'%s\', \'%s\', %s, %d, \'%s\', \'%s\', \'%s\')',
+            'INSERT INTO %s (mail_alias, receiver, last_sent, tries, api_identifier, status, locale, identifier) VALUES (\'%s\', \'%s\', %s, %d, \'%s\', \'%s\', \'%s\', \'%s\')',
             $this->mainTableName,
-            $mail::getIdentifier(),
+            $mail::getTemplateAlias(),
             $mail->getRecipient(),
-            !empty($identifier) ? 'NOW()' : 'NULL',
-            !empty($identifier) ? 1 : 0,
-            $identifier,
-            !empty($identifier) ? self::STATUS_WAIT : self::STATUS_CREATED,
-            $mail->getLocale()
+            !empty($apiIdentifier) ? 'NOW()' : 'NULL',
+            !empty($apiIdentifier) ? 1 : 0,
+            $apiIdentifier,
+            !empty($apiIdentifier) ? self::STATUS_WAIT : self::STATUS_CREATED,
+            $mail->getLocale(),
+            $mail->getIdentifier()
         ));
         $this->connection->exec(sprintf(
             'INSERT INTO %s (mail_id, data) VALUES (\'%d\', \'%s\')',
@@ -133,10 +134,10 @@ class MailRepository
 
     public function getMailFromDatabaseResult(array $mailRow): ?MailInterface
     {
-        return $this->constructMailObject($mailRow['mail_alias'], $mailRow['data'], $mailRow['receiver'], $mailRow['locale']);
+        return $this->constructMailObject($mailRow['mail_alias'], $mailRow['data'], $mailRow['receiver'], $mailRow['locale'], $mailRow['identifier']);
     }
 
-    public function constructMailObject(string $mailIdentifier, string $jsonData, string $receiver, string $locale = 'en'): ?MailInterface
+    public function constructMailObject(string $mailIdentifier, string $jsonData, string $receiver, string $locale, string $identifier): ?MailInterface
     {
         if (!array_key_exists($mailIdentifier, $this->mailIdentifierMap)) {
             return null;
@@ -156,7 +157,7 @@ class MailRepository
             return null;
         }
 
-        return new $class($receiver, $data, $locale);
+        return new $class($receiver, $data, $locale, $identifier);
     }
 
     /**

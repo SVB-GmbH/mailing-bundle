@@ -12,11 +12,15 @@ abstract class AbstractMail implements MailInterface
     /** @var string */
     protected $locale;
 
-    public function __construct(string $recipient, array $data, string $locale)
+    /** @var string */
+    protected $identifier;
+
+    public function __construct(string $recipient, array $data, string $locale, string $identifier = '')
     {
         $this->recipient = $recipient;
         $this->data = $data;
         $this->locale = $locale;
+        $this->identifier = $identifier;
     }
 
     public function getRecipient(): string
@@ -37,5 +41,10 @@ abstract class AbstractMail implements MailInterface
     public function getLocale(): string
     {
         return $this->locale;
+    }
+
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
     }
 }
